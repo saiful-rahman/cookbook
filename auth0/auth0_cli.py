@@ -9,7 +9,7 @@ with open("config/native-app.json", "r") as config_file:
     cfg = json.load(config_file)
 
 
-# python3 auth0/auth0.py get-access-token 'https://test/api' 'a@b.com' 'password'
+# python3 auth0/auth0_cli.py get-access-token 'https://test/api' 'a@b.com' 'password'
 @app.command()
 def get_access_token(audience: str, username: str, password: str):
 
@@ -32,7 +32,7 @@ def get_access_token(audience: str, username: str, password: str):
         print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
-# python3 auth0/auth0.py oauth-token 'https://saif/api
+# python3 auth0/auth0_cli.py oauth-token 'https://saif/api
 @app.command()
 def oauth_token(audience: str):
 

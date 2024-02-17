@@ -8,7 +8,7 @@ with open("config/native-app.json", "r") as config_file:
     cfg = json.load(config_file)
 
 
-# $ python jwt/jwt-example.py encode '{"username": "ringo", "pin": 1676261200}'
+# $ python jwt/jwt_test.py encode '{"username": "ringo", "pin": 1676261200}'
 @app.command()
 def encode(data):
     payload = eval(data)
@@ -16,7 +16,7 @@ def encode(data):
     print(encoded_payload)
 
 
-# $ python jwt/jwt-example.py decode blurb
+# $ python jwt/jwt_test.py decode blurb
 @app.command()
 def decode(encoded_payload):
     decoded_payload = jwt.decode(encoded_payload, cfg['jwt_secret'], algorithms=cfg['jwt_algorithm'])
