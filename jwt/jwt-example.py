@@ -1,24 +1,25 @@
 import typer
 import jwt
-
-SECRET_KEY = "top-secret"
-ALGORITHM = "HS256"
+import json
 
 app = typer.Typer()
+
+with open("config/native-app.json", "r") as config_file:
+    cfg = json.load(config_file)
 
 
 # $ python jwt/jwt-example.py encode '{"username": "ringo", "pin": 1676261200}'
 @app.command()
 def encode(data):
     payload = eval(data)
-    encoded_payload = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_payload = jwt.encode(payload, cfg['jwt_secret'], algorithm=cfg['jwt_algorithm'])
     print(encoded_payload)
 
 
-# $ python jwt/jwt-example.py decode eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJpbmdvIiwicGluIjoxNjc2MjYxMjAwfQ.CKXUe2U0Hv0DuIXnYCvoZONaEGx2JJ7jxxRPIikn1fg
+# $ python jwt/jwt-example.py decode blurb
 @app.command()
 def decode(encoded_payload):
-    decoded_payload = jwt.decode(encoded_payload, SECRET_KEY, algorithms=ALGORITHM)
+    decoded_payload = jwt.decode(encoded_payload, cfg['jwt_secret'], algorithms=cfg['jwt_algorithm'])
     print(decoded_payload)
 
 
