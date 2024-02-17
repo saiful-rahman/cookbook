@@ -6,6 +6,7 @@ ALGORITHM = "HS256"
 
 app = typer.Typer()
 
+
 # $ python jwt/jwt-example.py encode '{"username": "ringo", "pin": 1676261200}'
 @app.command()
 def encode(data):
