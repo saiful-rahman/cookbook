@@ -4,3 +4,4 @@ datetime
 requests
 fastapi
 uvicorn
+jinja2

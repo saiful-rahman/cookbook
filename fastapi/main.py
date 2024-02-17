@@ -1,86 +1,50 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-import jwt
-from jwt import PyJWTError
-from datetime import datetime, timedelta
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 import json
+from fastapi.templating import Jinja2Templates
+import requests
 
 app = FastAPI()
 
 with open("../config/native-app.json", "r") as config_file:
     cfg = json.load(config_file)
 
-SECRET_KEY = "mysecretkey"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+templates = Jinja2Templates(directory="templates")
 
 
-# Fake user model for demonstration purposes
-class User:
-    def __init__(self, username: str, password: str):
-        self.username = username
-        self.password = password
-
-# Fake user data
-fake_users_db = {
-    "testuser": User(username="testuser", password="password123")
-}
-
-# OAuth2PasswordBearer is used to get the token from the request
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=cfg['token_url'])
+@app.get("/login")
+def login():
+    auth_url = f"{cfg['authorize_url']}" \
+               f"?response_type=code&client_id={cfg['client_id']}" \
+               f"&scope=openid profile email"
+    return RedirectResponse(auth_url)
 
 
-# Function to create access token
-def create_access_token(data: dict, expires_delta: timedelta):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+@app.get("/logout")
+def logout():
+
+    payload = {
+        'client_id': cfg['client_id'],
+        "post_logout_redirect_uri": cfg['redirect_uri']
+    }
+    return RedirectResponse(payload)
+    response = requests.get(cfg['logout_url'], data=payload)
+    print(f"status_code:{response.status_code}")
+
+    if response.status_code == 200:
+        print("success")
+    else:
+        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
-# Function to verify token
-def verify_token(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = jwt.decode(token, cfg['jwt_secret'], algorithms=[cfg['jwt_algorithm']])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-    except PyJWTError:
-        raise credentials_exception
-
-    return username
+@app.get("/config")
+async def config(request: Request):
+    pretty_json = json.dumps(cfg, indent=2)
+    print(pretty_json)
+    return templates.TemplateResponse("config.html", {"request": request, "pretty_json": pretty_json})
 
 
-# Route to get a token
-@app.post("/token")
-async def login(form_data: dict):
-    username = form_data["username"]
-    password = form_data["password"]
+@app.get("/")
+async def home(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
 
-    user = fake_users_db.get(username)
-    if user is None or user.password != password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": username}, expires_delta=access_token_expires)
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-# Protected route that requires a valid token
-@app.get("/protected")
-async def protected_route(username: str = Depends(verify_token)):
-    return {"message": f"Hello {username}, you are in a protected route!"}
-#
-# if __name__ == "__main__":
-#     app()
