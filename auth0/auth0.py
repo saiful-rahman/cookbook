@@ -1,13 +1,12 @@
 import typer
 import requests
 import time
-
-DOMAIN = 'dev-aoojpnwcqsr11uc1.uk.auth0.com'
-CLIENT_ID = 'TJ0Qv9mrw5eqFM9GBVSWIiazFKcbmV70'
-CLIENT_SECRET = 'IOdSmVgj68JGGuQt0H0FLV-jqNvUKbYTqPzotOFaIh0-QdVihOCIll6yHHgh0p4T'
-GRANT_TYPE = 'password'
+import json
 
 app = typer.Typer()
+
+with open("config/native-app.json", "r") as config_file:
+    oidc_config = json.load(config_file)
 
 
 # python3 auth0/auth0.py get-access-token 'https://test/api' 'a@b.com' 'password'
@@ -15,16 +14,15 @@ app = typer.Typer()
 def get_access_token(audience: str, username: str, password: str):
 
     payload = {
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
+        'client_id': oidc_config['client_id'],
+        'client_secret': oidc_config['client_secret'],
         'username': username,
         'password': password,
         'audience': audience,
-        'grant_type': GRANT_TYPE
+        'grant_type': 'password'
     }
 
-    url = f"https://{DOMAIN}/oauth/token"
-    response = requests.post(url, data=payload)
+    response = requests.post(oidc_config['token_url'], data=payload)
     print(f"status_code:{response.status_code}")
 
     if response.status_code == 200:
@@ -48,8 +46,7 @@ def oauth_token(audience: str):
         'grant_type': 'client_credentials'
     }
 
-    url = f"https://{DOMAIN}/oauth/token"
-    response = requests.post(url, data=payload)
+    response = requests.post(oidc_config['token_url'], data=payload)
     print(f"status_code:{response.status_code}")
 
     if response.status_code == 200:
@@ -63,11 +60,10 @@ def oauth_token(audience: str):
 def oidc_logout():
 
     payload = {
-        'client_id': CLIENT_ID
+        'client_id': oidc_config['client_id'],
     }
 
-    url = f"https://{DOMAIN}/oidc/logout"
-    response = requests.post(url, data=payload)
+    response = requests.post(oidc_config['logout_url'], data=payload)
     print(f"status_code:{response.status_code}")
 
     if response.status_code == 200:
@@ -80,12 +76,11 @@ def oidc_logout():
 def oauth_device_code():
 
     payload = {
-        'client_id': CLIENT_ID,
+        'client_id': oidc_config['client_id'],
         'scope': 'openid'
     }
 
-    url = f"https://{DOMAIN}/oauth/device/code"
-    response = requests.post(url, data=payload)
+    response = requests.post(oidc_config['device_code_url'], data=payload)
     print(f"status_code:{response.status_code}")
 
     if response.status_code == 200:
@@ -101,13 +96,12 @@ def oauth_token_loop(device_code: str, interval: int):
     token_payload = {
         'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
         'device_code': device_code,
-        'client_id': CLIENT_ID
+        'client_id': oidc_config['client_id']
     }
 
     authenticated = False
     while not authenticated:
-        url = f"https://{DOMAIN}/oauth/token"
-        token_response = requests.post(url, data=token_payload)
+        token_response = requests.post(oidc_config['token_url'], data=token_payload)
 
         token_json = token_response.json()
         print(token_json)
@@ -121,16 +115,15 @@ def oauth_token_loop(device_code: str, interval: int):
 
 
 @app.command()
-def oauth_token(device_code: str, interval: int):
+def oauth_token(device_code: str):
 
     payload = {
         'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
         'device_code': device_code,
-        'client_id': CLIENT_ID
+        'client_id': oidc_config['client_id']
     }
 
-    url = f"https://{DOMAIN}/oauth/token"
-    response = requests.post(url, data=payload)
+    response = requests.post(oidc_config['token_url'], data=payload)
     print(f"status_code:{response.status_code}")
 
     if response.status_code == 200:
