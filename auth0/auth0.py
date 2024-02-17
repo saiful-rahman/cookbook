@@ -1,5 +1,6 @@
 import typer
 import requests
+import time
 
 DOMAIN = 'dev-aoojpnwcqsr11uc1.uk.auth0.com'
 CLIENT_ID = 'TJ0Qv9mrw5eqFM9GBVSWIiazFKcbmV70'
@@ -7,18 +8,6 @@ CLIENT_SECRET = 'IOdSmVgj68JGGuQt0H0FLV-jqNvUKbYTqPzotOFaIh0-QdVihOCIll6yHHgh0p4
 GRANT_TYPE = 'password'
 
 app = typer.Typer()
-
-
-def post_oauth_token(url: str, payload: dict):
-
-    response = requests.post(url, data=payload)
-
-    if response.status_code == 200:
-        response_json = response.json()
-        access_token = response_json.get('access_token')
-        print(access_token)
-    else:
-        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
 # python3 auth0/auth0.py get-access-token 'https://test/api' 'a@b.com' 'password'
@@ -35,7 +24,14 @@ def get_access_token(audience: str, username: str, password: str):
     }
 
     url = f"https://{DOMAIN}/oauth/token"
-    post_oauth_token(url, payload)
+    response = requests.post(url, data=payload)
+    print(f"status_code:{response.status_code}")
+
+    if response.status_code == 200:
+        response_json = response.json()
+        print(response_json)
+    else:
+        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
 # python3 auth0/auth0.py oauth-token 'https://saif/api
@@ -53,11 +49,18 @@ def oauth_token(audience: str):
     }
 
     url = f"https://{DOMAIN}/oauth/token"
-    post_oauth_token(url, payload)
+    response = requests.post(url, data=payload)
+    print(f"status_code:{response.status_code}")
+
+    if response.status_code == 200:
+        response_json = response.json()
+        print(response_json)
+    else:
+        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
 @app.command()
-def logout():
+def oidc_logout():
 
     payload = {
         'client_id': CLIENT_ID
@@ -65,26 +68,76 @@ def logout():
 
     url = f"https://{DOMAIN}/oidc/logout"
     response = requests.post(url, data=payload)
+    print(f"status_code:{response.status_code}")
 
-    if response.status_code != 200:
-        raise typer.Exit(code=1)
+    if response.status_code == 200:
+        print("success")
+    else:
+        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
 @app.command()
-def oidc_logout():
-
-    print("oauth-logout")
+def oauth_device_code():
 
     payload = {
+        'client_id': CLIENT_ID,
+        'scope': 'openid'
+    }
+
+    url = f"https://{DOMAIN}/oauth/device/code"
+    response = requests.post(url, data=payload)
+    print(f"status_code:{response.status_code}")
+
+    if response.status_code == 200:
+        response_json = response.json()
+        print(response_json)
+    else:
+        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
+
+
+@app.command()
+def oauth_token_loop(device_code: str, interval: int):
+
+    token_payload = {
+        'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+        'device_code': device_code,
         'client_id': CLIENT_ID
     }
 
-    url = 'https://dev-aoojpnwcqsr11uc1.uk.auth0.com/oidc/logout'
-    print("logout: " + url)
-    response = requests.post(url, data=payload)
+    authenticated = False
+    while not authenticated:
+        url = f"https://{DOMAIN}/oauth/token"
+        token_response = requests.post(url, data=token_payload)
 
-    if response.status_code != 200:
-        raise typer.Exit(code=1)
+        token_json = token_response.json()
+        print(token_json)
+
+        if token_response.status_code == 200:
+            authenticated = True
+        elif token_json['error'] not in ('authorization_pending', 'slow_down'):
+            raise typer.Exit(code=1)
+        else:
+            time.sleep(interval)
+
+
+@app.command()
+def oauth_token(device_code: str, interval: int):
+
+    payload = {
+        'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+        'device_code': device_code,
+        'client_id': CLIENT_ID
+    }
+
+    url = f"https://{DOMAIN}/oauth/token"
+    response = requests.post(url, data=payload)
+    print(f"status_code:{response.status_code}")
+
+    if response.status_code == 200:
+        response_json = response.json()
+        print(response_json)
+    else:
+        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
 if __name__ == "__main__":
