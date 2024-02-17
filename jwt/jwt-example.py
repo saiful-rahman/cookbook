@@ -10,7 +10,6 @@ app = typer.Typer()
 # $ python jwt/jwt-example.py encode '{"username": "ringo", "pin": 1676261200}'
 @app.command()
 def encode(data):
-
     payload = eval(data)
     encoded_payload = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     print(encoded_payload)
