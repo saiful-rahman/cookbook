@@ -3,12 +3,17 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from jwt import PyJWTError
 from datetime import datetime, timedelta
+import json
 
 app = FastAPI()
+
+with open("config/native-app.json", "r") as config_file:
+    cfg = json.load(config_file)
 
 SECRET_KEY = "mysecretkey"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 
 # Fake user model for demonstration purposes
 class User:
@@ -22,7 +27,7 @@ fake_users_db = {
 }
 
 # OAuth2PasswordBearer is used to get the token from the request
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=cfg['token_url'])
 
 
 # Function to create access token
@@ -43,7 +48,7 @@ def verify_token(token: str = Depends(oauth2_scheme)):
     )
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, cfg['jwt_secret'], algorithms=[cfg['jwt_algorithm']])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
