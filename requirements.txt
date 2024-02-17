@@ -2,3 +2,5 @@ typer
 PyJWT
 datetime
 requests
+fastapi
+uvicorn
