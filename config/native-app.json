@@ -1,0 +1,14 @@
+{
+  "client_id": "TJ0Qv9mrw5eqFM9GBVSWIiazFKcbmV70",
+  "client_secret": "IOdSmVgj68JGGuQt0H0FLV-jqNvUKbYTqPzotOFaIh0-QdVihOCIll6yHHgh0p4T",
+  "redirect_uri": "your_redirect_uri",
+  "authorize_url": "your_authorize_url",
+  "token_url": "https://dev-aoojpnwcqsr11uc1.uk.auth0.com/oauth/token",
+  "logout_url": "https://dev-aoojpnwcqsr11uc1.uk.auth0.com/oidc/logout",
+  "device_code_url": "https://dev-aoojpnwcqsr11uc1.uk.auth0.com/oauth/device/code",
+  "userinfo_url": "your_userinfo_url",
+  "jwks_url": "your_jwks_url",
+
+  "jwt_algorithm": "HS256",
+  "jwt_secret": "top-secret"
+}
