@@ -9,9 +9,8 @@ GRANT_TYPE = 'password'
 app = typer.Typer()
 
 
-def post_oauth_token(payload: dict):
+def post_oauth_token(url: str, payload: dict):
 
-    url = f"https://{DOMAIN}/oauth/token"
     response = requests.post(url, data=payload)
 
     if response.status_code == 200:
@@ -35,7 +34,8 @@ def get_access_token(audience: str, username: str, password: str):
         'grant_type': GRANT_TYPE
     }
 
-    post_oauth_token(payload)
+    url = f"https://{DOMAIN}/oauth/token"
+    post_oauth_token(url, payload)
 
 
 # python3 auth0/auth0.py oauth-token 'https://saif/api
@@ -52,7 +52,39 @@ def oauth_token(audience: str):
         'grant_type': 'client_credentials'
     }
 
-    post_oauth_token(payload)
+    url = f"https://{DOMAIN}/oauth/token"
+    post_oauth_token(url, payload)
+
+
+@app.command()
+def logout():
+
+    payload = {
+        'client_id': CLIENT_ID
+    }
+
+    url = f"https://{DOMAIN}/oidc/logout"
+    response = requests.post(url, data=payload)
+
+    if response.status_code != 200:
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def oidc_logout():
+
+    print("oauth-logout")
+
+    payload = {
+        'client_id': CLIENT_ID
+    }
+
+    url = 'https://dev-aoojpnwcqsr11uc1.uk.auth0.com/oidc/logout'
+    print("logout: " + url)
+    response = requests.post(url, data=payload)
+
+    if response.status_code != 200:
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":
