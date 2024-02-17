@@ -7,7 +7,7 @@ import json
 
 app = FastAPI()
 
-with open("config/native-app.json", "r") as config_file:
+with open("../config/native-app.json", "r") as config_file:
     cfg = json.load(config_file)
 
 SECRET_KEY = "mysecretkey"
