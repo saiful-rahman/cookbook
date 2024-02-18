@@ -6,14 +6,16 @@ import json
 from auth0 import Auth0Error
 from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
 
-
-cfg = []
+cfg = dict()
 app = typer.Typer()
+
 
 def load_config(config_file: str):
     global cfg
-    with open("config/native-app.json", "r") as config_file:
-        cfg = json.load(config_file)
+    config_file = open(config_file, 'r')
+    cfg = json.load(config_file)
+    return cfg
+
 
 # python3 auth0/auth0_cli.py get-access-token 'https://test/api' 'a@b.com' 'password'
 @app.command()
@@ -26,30 +28,6 @@ def get_access_token(audience: str, username: str, password: str):
         'password': password,
         'audience': audience,
         'grant_type': 'password'
-    }
-
-    response = requests.post(cfg['token_url'], data=payload)
-    print(f"status_code:{response.status_code}")
-
-    if response.status_code == 200:
-        response_json = response.json()
-        print(response_json)
-    else:
-        print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
-
-
-# python3 auth0/auth0_cli.py oauth-token 'https://saif/api
-@app.command()
-def oauth_token(audience: str):
-
-    C_ID = "ExuqYdxKcF2bcjHHrv3aqS0R470BtGu5"
-    C_SECRET = "G9ZfvzXqq4ziTosCpb-r-WmLDJWuMWka4WWHp4yXyBOia2nkpxZOHIjNesOfDd1f"
-
-    payload = {
-        'client_id': C_ID,
-        'client_secret': C_SECRET,
-        'audience': audience,
-        'grant_type': 'client_credentials'
     }
 
     response = requests.post(cfg['token_url'], data=payload)
@@ -160,5 +138,5 @@ def verify_token(id_token: str):
 
 
 if __name__ == "__main__":
-    load_config('..\config\native-app.json')
+    load_config("./config/native-app.json")
     app()
