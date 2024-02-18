@@ -3,7 +3,7 @@ from oauth2 import OAuth2
 import configparser
 
 
-class MyTestCase(unittest.TestCase):
+class OAuth2TestCase(unittest.TestCase):
 
     def test_domain_urls(self):
         oauth2 = OAuth2()

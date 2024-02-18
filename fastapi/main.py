@@ -59,8 +59,13 @@ def logout():
         print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
-@app.get("/config")
-async def config(request: Request):
+@app.get(f"/config/{config_file}")
+async def config(request: Request, config_file: str):
+    return {"test": "test123"}
+
+
+@app.get("/config_old")
+async def config_old(request: Request):
     pretty_json = json.dumps(cfg, indent=2)
     print(pretty_json)
     return templates.TemplateResponse("config.html", {"request": request, "pretty_json": pretty_json})
