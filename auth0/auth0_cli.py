@@ -6,11 +6,14 @@ import json
 from auth0 import Auth0Error
 from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
 
+
+cfg = []
 app = typer.Typer()
 
-with open("config/native-app.json", "r") as config_file:
-    cfg = json.load(config_file)
-
+def load_config(config_file: str):
+    global cfg
+    with open("config/native-app.json", "r") as config_file:
+        cfg = json.load(config_file)
 
 # python3 auth0/auth0_cli.py get-access-token 'https://test/api' 'a@b.com' 'password'
 @app.command()
@@ -157,4 +160,5 @@ def verify_token(id_token: str):
 
 
 if __name__ == "__main__":
+    load_config('..\config\native-app.json')
     app()
