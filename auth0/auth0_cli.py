@@ -3,6 +3,9 @@ import requests
 import time
 import json
 
+from auth0 import Auth0Error
+from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
+
 app = typer.Typer()
 
 with open("config/native-app.json", "r") as config_file:
@@ -56,6 +59,7 @@ def oauth_token(audience: str):
         print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
+# $ python auth0/auth0_cli.py oidc-logout
 @app.command()
 def oidc_logout():
 
@@ -72,6 +76,7 @@ def oidc_logout():
         print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
 
 
+# $ python auth0/auth0_cli.py oauth-device-code
 @app.command()
 def oauth_device_code():
 
@@ -114,6 +119,7 @@ def oauth_token_loop(device_code: str, interval: int):
             time.sleep(interval)
 
 
+# $ python auth0/auth0_cli.py oauth-token x472JUkihP_Zft3qrPPNo95I
 @app.command()
 def oauth_token(device_code: str):
 
@@ -131,6 +137,23 @@ def oauth_token(device_code: str):
         print(response_json)
     else:
         print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
+
+
+@app.command()
+def verify_token(id_token: str):
+    signature_verifier = AsymmetricSignatureVerifier(cfg['jwks_url'])
+    issuer = cfg['issuer'] + '/'
+
+    try:
+        token_verifier = TokenVerifier(signature_verifier=signature_verifier, issuer=issuer, audience=cfg['client_id'])
+        token_info = token_verifier.verify(id_token)
+        print(token_info)
+    except Auth0Error as e:
+        # Handle Auth0 errors
+        print(f"Auth0Error: {e}")
+    except Exception as e:
+        # Handle other unexpected errors
+        print(f"Unexpected error: {e}")
 
 
 if __name__ == "__main__":

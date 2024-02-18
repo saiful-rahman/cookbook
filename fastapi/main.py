@@ -1,15 +1,37 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import RedirectResponse
 import json
+
+from fastapi.security import HTTPBearer
 from fastapi.templating import Jinja2Templates
 import requests
-
-app = FastAPI()
 
 with open("../config/native-app.json", "r") as config_file:
     cfg = json.load(config_file)
 
 templates = Jinja2Templates(directory="templates")
+
+token_auth_scheme = HTTPBearer()
+
+app = FastAPI()
+
+
+@app.get("/api/private")
+def private(token: str = Depends(token_auth_scheme)):
+    result = {
+        "status": "success",
+        "msg": "hello private!"
+    }
+    return result
+
+
+@app.get("/api/public")
+def public():
+    result = {
+        "status": "success",
+        "msg": "hello public!"
+    }
+    return result
 
 
 @app.get("/login")

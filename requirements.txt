@@ -1,7 +1,9 @@
-typer
-PyJWT
+typer~=0.9.0
+PyJWT~=2.8.0
 datetime
-requests
-fastapi
+requests~=2.31.0
+fastapi~=0.109.2
 uvicorn
 jinja2
+pydantic
+auth0-python
