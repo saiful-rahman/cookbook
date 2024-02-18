@@ -1,8 +1,6 @@
 import requests
-# import time
 import json
 
-from auth0 import Auth0Error
 from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
 
 
@@ -168,44 +166,3 @@ class OAuth2:
         response = requests.post(self.get_logout_url(), data=payload)
         status_code = response.status_code
         return status_code
-
-# from auth0 import Auth0Error
-# from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
-#
-# # $ python auth0/auth0_cli.py oidc-logout
-# def oidc_logout(cfg: dict):
-#
-#     payload = {
-#         'client_id': cfg['client_id'],
-#     }
-#
-#     response = requests.post(cfg['logout_url'], data=payload)
-#     print(f"status_code:{response.status_code}")
-#
-#     if response.status_code == 200:
-#         print("success")
-#     else:
-#         print(f"failed: status-code:{response.status_code}, error-text:{response.text}")
-#
-#
-# def oauth_token_loop(cfg: dict, device_code: str, interval: int):
-#
-#     token_payload = {
-#         'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
-#         'device_code': device_code,
-#         'client_id': cfg['client_id']
-#     }
-#
-#     authenticated = False
-#     while not authenticated:
-#         token_response = requests.post(cfg['token_url'], data=token_payload)
-#
-#         token_json = token_response.json()
-#         print(token_json)
-#
-#         if token_response.status_code == 200:
-#             authenticated = True
-#         elif token_json['error'] not in ('authorization_pending', 'slow_down'):
-#             raise typer.Exit(code=1)
-#         else:
-#             time.sleep(interval)
