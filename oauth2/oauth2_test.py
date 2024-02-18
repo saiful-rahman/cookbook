@@ -52,6 +52,13 @@ class MyTestCase(unittest.TestCase):
         except Exception as e:
             print(e)
 
+    def test_oidc_logout(self):
+        oauth2 = OAuth2()
+        oauth2.load_config(json_config='../config/mini-native-app.json')
+        # oauth2.print()
+        status_code = oauth2.oidc_logout()
+        print(status_code)
+
 
 if __name__ == '__main__':
     unittest.main()

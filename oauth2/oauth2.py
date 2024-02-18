@@ -159,6 +159,16 @@ class OAuth2:
         except Exception as e:
             raise e
 
+    def oidc_logout(self):
+
+        payload = {
+            'client_id': self.get_client_id(),
+        }
+
+        response = requests.post(self.get_logout_url(), data=payload)
+        status_code = response.status_code
+        return status_code
+
 # from auth0 import Auth0Error
 # from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
 #
@@ -199,20 +209,3 @@ class OAuth2:
 #             raise typer.Exit(code=1)
 #         else:
 #             time.sleep(interval)
-#
-#
-# def verify_token(cfg: dict, id_token: str):
-#
-#     signature_verifier = AsymmetricSignatureVerifier(cfg['jwks_url'])
-#     issuer = cfg['issuer'] + '/'
-#
-#     try:
-#         token_verifier = TokenVerifier(signature_verifier=signature_verifier, issuer=issuer, audience=cfg['client_id'])
-#         token_info = token_verifier.verify(id_token)
-#         print(token_info)
-#     except Auth0Error as e:
-#         # Handle Auth0 errors
-#         print(f"Auth0Error: {e}")
-#     except Exception as e:
-#         # Handle other unexpected errors
-#         print(f"Unexpected error: {e}")
